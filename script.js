@@ -7,9 +7,25 @@ const scoreDisplay = document.getElementById("score"); // Reference to the score
 let score = 0; // Player's score
 let countdown; // Timer ID
 
+//sound effects
+const popSound = new Audio("sounds/collect-points-190037.mp3");
+const badDropSound = new Audio("sounds/falled-sound-effect-278635.mp3");
 
-// Wait for button click to start the game
+//game mode settings
+let mode = "medium"; //default mode is medium
+let dropSpeed = 4; //default drop speed for medium mode
+let dropInterval = 1000; //default drop interval for medium mode
+let gameDuration = 30; //default game duration for medium mode
+
+
 document.getElementById("start-btn").addEventListener("click", startGame);
+
+//difficulty select event listener
+document.getElementById("difficulty-select").addEventListener("change", function(event){
+  mode = event.target.value; //update mode based on user selection
+});
+
+// Function to start the game
 
 function startGame() {
   // Prevent multiple games from running at once
@@ -17,8 +33,10 @@ function startGame() {
 
   gameRunning = true;
 
+  setMode(); // Set game parameters based on selected mode
+
   //reset timer for next game 
-  timerDuration = 30; 
+  timerDuration = gameDuration;
   timerDisplay.textContent = timerDuration;
 
   // Reset score and update display
@@ -26,16 +44,35 @@ function startGame() {
   scoreDisplay.textContent = score;
 
   // Create new drops every second (1000 milliseconds)
-  dropMaker = setInterval(createDrop, 1000);
+  dropMaker = setInterval(createDrop, dropInterval);
 
   // Reset and display the timer
   startTimer();
 
 }
 
+// mode functions 
+function setMode(){
+  if (mode === "easy"){
+    dropSpeed = 6;
+    dropInterval = 1500;
+    gameDuration = 60;
+  }else if (mode === "medium"){
+    dropSpeed = 4;
+    dropInterval = 1000;
+    gameDuration = 30;
+  }else if (mode === "hard"){
+    dropSpeed = 2;
+    dropInterval = 700;
+    gameDuration = 20;
+  }
+}
+
 function endGame() {
   clearInterval(countdown); // Stop the countdown timer
   clearInterval(dropMaker); // Stop creating new drops
+  const drops = document.querySelectorAll(".water-drop");
+  drops.forEach(drop => drop.remove()); // Remove all existing drops
   gameRunning = false;
 
 }
@@ -53,6 +90,7 @@ function startTimer(){
     if (timerDuration <= 0){
       clearInterval(countdown); //setInterval returns an ID that can be cleared by using the clearInterval (which is another built in JS function)
       endGame();
+      alert("Time's up! Please try again T^T");
     }
   }, 1000);
 }
@@ -60,7 +98,17 @@ function startTimer(){
 function createDrop() {
   // Create a new div element that will be our water drop
   const drop = document.createElement("div");
-  drop.className = "water-drop";
+
+  //creating a varaible to check if a drop is bad or not
+
+  const isBadDrop = Math.random() < 0.2; // 20% chance of being a bad drop
+
+  // Assign the appropriate class based on drop type
+  if (!isBadDrop){
+    drop.className = "water-drop";
+  } else {
+    drop.className = "bad-drop";
+  }
 
   // Make drops different sizes for visual variety
   const initialSize = 60;
@@ -75,14 +123,21 @@ function createDrop() {
   drop.style.left = xPosition + "px";
 
   // Make drops fall for 4 seconds
-  drop.style.animationDuration = "4s";
+  drop.style.animationDuration = dropSpeed +"s";
 
   // Add the new drop to the game screen
   document.getElementById("game-container").appendChild(drop);
 
   //give user points for clicking the drop
   drop.addEventListener("click", () => {
-    score++; //increase score by 1
+    if (isBadDrop && score > 0){
+      badDropSound.play(); //play bad drop sound effect
+      score --; //decrease score by 1 for bad drop
+    } else if (!isBadDrop){
+      popSound.play(); //play pop sound effect
+      score++; //increase score by 1
+    }
+
     scoreDisplay.textContent = score; //update score display
     drop.remove(); //remove the drop once clicked
 
@@ -90,6 +145,7 @@ function createDrop() {
     if (score === 20){
       confetti(); //call the confetti function to celebrate
       endGame(); //end the game
+      alert("Congratulations :3 You've reached 20 points and won the game >v<");
     }
   });
 
