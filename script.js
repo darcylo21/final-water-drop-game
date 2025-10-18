@@ -16,6 +16,7 @@ let mode = "medium"; //default mode is medium
 let dropSpeed = 4; //default drop speed for medium mode
 let dropInterval = 1000; //default drop interval for medium mode
 let gameDuration = 30; //default game duration for medium mode
+let percentBadDrops = 0.2; //20% of drops are bad drops
 
 
 document.getElementById("start-btn").addEventListener("click", startGame);
@@ -57,21 +58,24 @@ function setMode(){
     dropSpeed = 6;
     dropInterval = 1500;
     gameDuration = 60;
+    percentBadDrops = 0.1; // 10% bad drops for easy mode
   }else if (mode === "medium"){
     dropSpeed = 4;
     dropInterval = 1000;
     gameDuration = 30;
+    percentBadDrops = 0.2; // 20% bad drops for medium mode
   }else if (mode === "hard"){
     dropSpeed = 2;
     dropInterval = 700;
     gameDuration = 20;
+    percentBadDrops = 0.3; // 30% bad drops for hard mode
   }
 }
 
 function endGame() {
   clearInterval(countdown); // Stop the countdown timer
   clearInterval(dropMaker); // Stop creating new drops
-  const drops = document.querySelectorAll(".water-drop");
+  const drops = document.querySelectorAll(".water-drop,.bad-drop");
   drops.forEach(drop => drop.remove()); // Remove all existing drops
   gameRunning = false;
 
@@ -90,7 +94,9 @@ function startTimer(){
     if (timerDuration <= 0){
       clearInterval(countdown); //setInterval returns an ID that can be cleared by using the clearInterval (which is another built in JS function)
       endGame();
-      alert("Time's up! Please try again T^T");
+      setTimeout(() => {
+        alert("Time's up! Please try again T^T");
+      }, 300); 
     }
   }, 1000);
 }
@@ -101,7 +107,7 @@ function createDrop() {
 
   //creating a varaible to check if a drop is bad or not
 
-  const isBadDrop = Math.random() < 0.2; // 20% chance of being a bad drop
+  const isBadDrop = Math.random() < percentBadDrops; // 20% chance of being a bad drop
 
   // Assign the appropriate class based on drop type
   if (!isBadDrop){
@@ -145,7 +151,9 @@ function createDrop() {
     if (score === 20){
       confetti(); //call the confetti function to celebrate
       endGame(); //end the game
-      alert("Congratulations :3 You've reached 20 points and won the game >v<");
+      setTimeout(() => {
+        alert("Congratulations :3 You've reached 20 points and won the game >v<");
+      }, 300); 
     }
   });
 

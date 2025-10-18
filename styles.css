@@ -54,7 +54,7 @@ body {
     align-items: center;
     min-height: 100vh;
     background-color:#FFF7E1;
-    font-family: 'Proxima Nova', 'Avenir', Avenir, 'Segoe UI', Arial, sans-serif;
+    font-family: 'Proxima Nova', 'Avenir', Avenir, 'Segoe UI';
 }
 
 .header {
